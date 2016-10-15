@@ -1,4 +1,30 @@
 
+/*
+ * Notes for success!
+ * We want to have the menu system setup such that there is a Mode that display
+ *
+ *All present color and 
+ * 
+
+ * 
+ */
+
+
+#include <Button.h>        //https://github.com/JChristensen/Button
+
+#define BUTTON_PIN 12       //Connect a tactile button switch (or something similar)
+                           //from Arduino pin 2 to ground.
+#define PULLUP true        //To keep things simple, we use the Arduino's internal pullup resistor.
+#define INVERT true        //Since the pullup resistor will keep the pin high unless the
+                           //switch is closed, this is negative logic, i.e. a high state
+                           //means the button is NOT pressed. (Assuming a normally open switch.)
+#define DEBOUNCE_MS 20     //A debounce time of 20 milliseconds usually works well for tactile button switches.
+
+//#define LED_PIN 13         //The standard Arduino "Pin 13" LED.
+#define LONG_PRESS 1000    //We define a "long press" to be 1000 milliseconds.
+#define BLINK_INTERVAL 100 //In the BLINK state, switch the LED every 100 milliseconds.
+
+Button myBtn(BUTTON_PIN, PULLUP, INVERT, DEBOUNCE_MS);    //Declare the button
 
 
 
@@ -44,18 +70,15 @@ LSM9DS1 imu;
 #define DECLINATION -8.58 // Declination (degrees) in Boulder, CO.
 
 
- int getRoll_int(float ax, float ay, float az)
+ int getPitch_int(float ax, float ay, float az)
  {
-  //get radians to degrees
+  
  
   float pitch = atan2(-ax, sqrt(ay * ay + az * az));
+  
+  //get radians to degrees
   pitch *= 180.0 / PI;
 
-  Serial.print("Pitch: ");
-  Serial.print(pitch, 2);
-
-  Serial.println();
-  
   return map(pitch, -90, 90, 0, 255);
 
  }
@@ -72,6 +95,12 @@ void FillLEDsFromPaletteColors( uint8_t colorIndex)
 }
 
 void setup() {
+
+
+  //Debug information coming off of mapping
+
+ // Serial.begin(115200);
+  
   
   // Before initializing the IMU, there are a few settings
   // we may need to adjust. Use the settings struct to set
@@ -94,21 +123,21 @@ void setup() {
 }
 
 
-//currentPalette[i] = CHSV();
-
-//fill_solid( currentPalette, 16, CRGB::Black);
-//CRGB purple = CHSV( HUE_PURPLE, 255, 255);
-
-
 
 void loop() {
 
   //Read data off Accel
   imu.readAccel();
+
+  
+
+  
+  Serial.print(getPitch_int(imu.ax, imu.ay, imu.az));
+  Serial.println();
   
   // put your main code here, to run repeatedly:
   
-  fill_solid( currentPalette, 16,CHSV(getRoll_int(imu.ax, imu.ay, imu.az), 255, 255));
+  fill_solid( currentPalette, 16,CHSV(getPitch_int(imu.ax, imu.ay, imu.az), 255, 255));
 
   
   FillLEDsFromPaletteColors(0);
@@ -116,21 +145,3 @@ void loop() {
   FastLED.show();
 //  FastLED.delay(1000 / UPDATES_PER_SECOND);
 }
-
-
-
-
-
-/*void FillLEDsFromPaletteColors( uint8_t colorIndex)
-{
-    uint8_t brightness = 255;
-    
-    for( int i = 0; i < NUM_LEDS; i++) {
-        leds[i] = ColorFromPalette( currentPalette, colorIndex, brightness, currentBlending);
-        colorIndex += 3;
-    }
-}
-*/
-
-
-////////////////////////////////////////////////////
